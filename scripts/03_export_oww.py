@@ -8,6 +8,7 @@ and validated for correct input/output shapes.
 
 Usage: python 03_export_oww.py <word_id>
 """
+import _compat  # noqa: F401 — must be first
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 

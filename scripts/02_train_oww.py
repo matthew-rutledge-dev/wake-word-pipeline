@@ -7,6 +7,7 @@ GPU used for: embedding computation (melspec+Google model) and DNN training.
 
 Usage: python 02_train_oww.py <word_id>
 """
+import _compat  # noqa: F401 — must be first
 import argparse
 import json
 import logging

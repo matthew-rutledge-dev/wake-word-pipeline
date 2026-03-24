@@ -9,6 +9,7 @@ GPU used for OWW inference if available.
 
 Usage: python 06_validate.py <word_id> [oww|mww]
 """
+import _compat  # noqa: F401 — must be first
 import argparse
 import logging
 import sys

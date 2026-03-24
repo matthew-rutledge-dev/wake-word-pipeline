@@ -7,6 +7,7 @@ FALLBACK: espeak-ng (formant synthesis, CPU only)
 
 Usage: python 01_generate_samples.py <word_id> [--engine piper|espeak]
 """
+import _compat  # noqa: F401 — must be first
 import argparse
 import logging
 import os
@@ -83,8 +84,7 @@ def generate_piper_samples(
     device: str,
 ):
     """Generate WAV samples using Piper TTS (GPU accelerated)."""
-    sys.path.insert(0, str(PIPER_DIR))
-    from generate_samples import generate_samples
+    from piper_sample_generator.__main__ import generate_samples
 
     output_dir.mkdir(parents=True, exist_ok=True)
     existing = len(list(output_dir.glob("*.wav")))
@@ -95,16 +95,21 @@ def generate_piper_samples(
     needed = max_samples - existing
     piper_cfg = cfg["piper"]
 
+    model_path = PIPER_DIR / "models" / piper_cfg["model"]
+    if not model_path.exists():
+        log.error("Piper voice model not found: %s", model_path)
+        sys.exit(1)
+
     log.info("Generating %d Piper TTS samples → %s (device=%s)", needed, output_dir, device)
     generate_samples(
         text=phrases,
+        model=str(model_path),
         max_samples=needed,
         batch_size=piper_cfg["batch_size"],
         noise_scales=piper_cfg["noise_scales"],
         noise_scale_ws=piper_cfg["noise_scale_ws"],
         length_scales=piper_cfg["length_scales"],
         output_dir=str(output_dir),
-        auto_reduce_batch_size=True,
         file_names=[uuid.uuid4().hex + ".wav" for _ in range(needed)],
     )
     torch.cuda.empty_cache()
