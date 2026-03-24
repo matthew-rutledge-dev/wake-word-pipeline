@@ -54,7 +54,7 @@ def load_config(word_id: str) -> dict:
 
 def ensure_piper_setup(cfg: dict):
     """Clone piper-sample-generator and download voice model if missing."""
-    if not (PIPER_DIR / "generate_samples.py").exists():
+    if not (PIPER_DIR / "piper_sample_generator" / "__main__.py").exists():
         log.info("Cloning piper-sample-generator...")
         subprocess.run(
             ["git", "clone", "--depth", "1",
