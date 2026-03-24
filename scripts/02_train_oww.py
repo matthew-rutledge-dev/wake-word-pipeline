@@ -34,11 +34,12 @@ OWW_DIR = Path(os.environ.get("OWW_PATH", str(REPO_DIR / "openWakeWord")))
 
 
 def detect_device():
+    """Return 'gpu' if CUDA available, else 'cpu'. OWW uses 'gpu'/'cpu' not 'cuda'."""
     if torch.cuda.is_available():
         name = torch.cuda.get_device_name(0)
         mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         log.info("GPU: %s (%.1f GB) — using CUDA for training", name, mem)
-        return "cuda"
+        return "gpu"
     log.warning("No CUDA GPU — training on CPU (slower)")
     return "cpu"
 
@@ -83,7 +84,7 @@ def build_oww_training_config(cfg: dict, artifact_dir: Path) -> dict:
             "positive": 50,
         },
         "model_type": oww["model_type"],
-        "layer_size": oww["layer_size"],
+        "layer_dim": oww["layer_size"],
         "steps": oww["steps"],
         "max_negative_weight": oww["max_negative_weight"],
         "target_false_positives_per_hour": oww["target_fp_per_hour"],
@@ -92,8 +93,12 @@ def build_oww_training_config(cfg: dict, artifact_dir: Path) -> dict:
 
 
 def download_data_assets(artifact_dir: Path):
-    """Download background noise, RIR data, and validation features if missing."""
+    """Download background noise, RIR data, validation features, and OWW feature models if missing."""
     import subprocess
+
+    # Download OWW feature extraction models (melspectrogram.onnx, embedding_model.onnx)
+    from openwakeword.utils import download_models
+    download_models(model_names=[])
 
     rir_dir = artifact_dir / "rir_data"
     bg_dir = artifact_dir / "background_data"
@@ -283,15 +288,14 @@ def train_model(oww_config: dict, device: str, artifact_dir: Path):
     n_timesteps = sample_features.shape[1] if sample_features.ndim == 3 else 1
 
     # Create model
-    log.info("Creating OWW model (type=%s, layer_size=%d, device=%s)",
-             oww_config["model_type"], oww_config["layer_size"], device)
+    log.info("Creating OWW model (type=%s, layer_dim=%d, device=%s)",
+             oww_config["model_type"], oww_config["layer_dim"], device)
 
     oww_model = OWWTrainModel(
         n_classes=1,
         input_shape=(n_timesteps, n_features),
         model_type=oww_config["model_type"],
-        layer_size=oww_config["layer_size"],
-        device=device,
+        layer_dim=oww_config["layer_dim"],
     )
 
     # Train
