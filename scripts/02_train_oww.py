@@ -36,7 +36,7 @@ OWW_DIR = Path(os.environ.get("OWW_PATH", str(REPO_DIR / "openWakeWord")))
 def detect_device():
     if torch.cuda.is_available():
         name = torch.cuda.get_device_name(0)
-        mem = torch.cuda.get_device_properties(0).total_mem / (1024**3)
+        mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         log.info("GPU: %s (%.1f GB) — using CUDA for training", name, mem)
         return "cuda"
     log.warning("No CUDA GPU — training on CPU (slower)")
