@@ -210,7 +210,7 @@ def augment_and_compute_features(oww_config: dict, device: str):
         compute_features_from_generator(
             generator=clip_generator,
             n_total=n_clips,
-            clip_duration=total_length / 16000,
+            clip_duration=total_length,
             output_file=str(feature_path),
             device=device,
         )
