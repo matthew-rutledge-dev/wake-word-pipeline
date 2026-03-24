@@ -1,10 +1,18 @@
-# microWakeWord training dependencies
-# TODO: Pin versions after first successful mWW training run
+# GPU-aware PyTorch (CUDA 12.x)
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch>=2.11.0
+
+# microWakeWord training
 microwakeword
-tensorflow==2.21.0
-numpy==2.4.3
-scipy==1.17.1
-soundfile==0.13.1
-librosa==0.11.0
+tensorflow>=2.21.0
+
+# Audio processing
+librosa>=0.11.0
+soundfile>=0.13.1
+scipy>=1.17.1
+numpy>=2.4.3
+webrtcvad>=2.0.10
+
+# Utilities
 tqdm
 PyYAML

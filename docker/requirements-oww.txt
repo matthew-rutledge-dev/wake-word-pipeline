@@ -1,16 +1,36 @@
-openwakeword==0.4.0
-tensorflow==2.21.0
-keras==3.13.2
-torch==2.11.0+cpu
-onnx==1.20.1
-onnxruntime==1.24.4
-onnxscript==0.6.2
-librosa==0.11.0
-soundfile==0.13.1
-datasets==4.8.4
-scikit-learn==1.8.0
-scipy==1.17.1
-numpy==2.4.3
-h5py==3.14.0
+# GPU-aware PyTorch (CUDA 12.x) — falls back to CPU if no GPU
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch>=2.11.0
+torchaudio>=2.11.0
+torchinfo>=1.8.0
+
+# openWakeWord + training deps
+openwakeword>=0.4.0
+tensorflow>=2.21.0
+keras>=3.13.2
+onnx>=1.20.1
+onnxruntime-gpu>=1.24.4
+onnxscript>=0.6.2
+
+# Audio processing
+librosa>=0.11.0
+soundfile>=0.13.1
+acoustics>=0.2.0
+webrtcvad>=2.0.10
+mutagen>=1.47.0
+
+# Data + ML
+datasets>=4.8.4
+scikit-learn>=1.8.0
+scipy>=1.17.1
+numpy>=2.4.3
+h5py>=3.14.0
+
+# Piper TTS deps (phonemizer installed separately via apt/pip)
+piper-phonemize>=1.1.0
+
+# Utilities
 tqdm
 PyYAML
+pronouncinglib>=0.2.0
+ai-edge-litert>=1.2.0

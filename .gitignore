@@ -1,22 +1,36 @@
 # Training artifacts (large files, not tracked in git)
-artifacts/*/*.tflite
-artifacts/*/*.onnx
-artifacts/*/*.onnx.data
-artifacts/*/*.h5
-artifacts/*/*.pt
-artifacts/*/*.npy
+artifacts/**/*.tflite
+artifacts/**/*.onnx
+artifacts/**/*.onnx.data
+artifacts/**/*.h5
+artifacts/**/*.pt
+artifacts/**/*.npy
+artifacts/**/*.wav
+artifacts/**/positive_train/
+artifacts/**/positive_val/
+artifacts/**/negative_train/
+artifacts/**/negative_val/
+artifacts/**/rir_data/
+artifacts/**/background_data/
 
-# Training data
+# Staging (reviewed before manual submission)
+staging/*/oww/
+staging/*/mww/
+
+# Training data downloads
 *.tar.gz
-hey_ara_training/positive/
-hey_ara_training/negative/
-hey_ara_training/LibriSpeech/
+hey_ara_training/
+LibriSpeech/
+piper-sample-generator/
+openWakeWord/
+microWakeWord/
 
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+*.egg-info/
 
 # OS
 .DS_Store

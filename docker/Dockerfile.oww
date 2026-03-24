@@ -1,15 +1,44 @@
-# Dockerfile for openWakeWord training
+# Dockerfile for openWakeWord training (GPU-first, CPU fallback)
 # Build: docker build -t oww-train -f docker/Dockerfile.oww .
-# Run:   docker run --gpus all -v /opt/ai/wakeword-train:/workspace oww-train
+# Run GPU:  docker run --gpus all -v /opt/ai/wakeword-train:/workspace oww-train
+# Run CPU:  docker run -v /opt/ai/wakeword-train:/workspace oww-train
 
-FROM python:3.13-slim
+FROM nvidia/cuda:12.9.0-runtime-ubuntu24.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# System deps: audio processing, Piper phonemizer, build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    espeak-ng sox libsox-fmt-all libsndfile1 git \
+    python3 python3-pip python3-venv python3-dev \
+    espeak-ng libespeak-ng-dev sox libsox-fmt-all libsndfile1 \
+    git wget ca-certificates build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Create venv to avoid PEP 668 issues
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python deps (GPU-aware PyTorch + TensorFlow)
 COPY docker/requirements-oww.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Clone piper-sample-generator and download default voice model
+RUN git clone --depth 1 https://github.com/rhasspy/piper-sample-generator /opt/piper-sample-generator \
+    && mkdir -p /opt/piper-sample-generator/models \
+    && wget -q -O /opt/piper-sample-generator/models/en_US-libritts_r-medium.pt \
+       'https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt'
+
+# Install piper-phonemize (required by piper-sample-generator)
+RUN pip install --no-cache-dir piper-phonemize
+
+# Clone openWakeWord for training library
+RUN git clone --depth 1 https://github.com/dscripka/openWakeWord /opt/openwakeword \
+    && pip install --no-cache-dir -e /opt/openwakeword
+
+ENV PIPER_SAMPLE_GENERATOR_PATH=/opt/piper-sample-generator
+ENV OWW_PATH=/opt/openwakeword
 
 WORKDIR /workspace
 ENTRYPOINT ["python3"]
