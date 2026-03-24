@@ -1,0 +1,15 @@
+# Dockerfile for openWakeWord training
+# Build: docker build -t oww-train -f docker/Dockerfile.oww .
+# Run:   docker run --gpus all -v /opt/ai/wakeword-train:/workspace oww-train
+
+FROM python:3.13-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    espeak-ng sox libsox-fmt-all libsndfile1 git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/requirements-oww.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+WORKDIR /workspace
+ENTRYPOINT ["python3"]

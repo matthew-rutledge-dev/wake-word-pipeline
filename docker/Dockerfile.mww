@@ -1,0 +1,15 @@
+# Dockerfile for microWakeWord training
+# Build: docker build -t mww-train -f docker/Dockerfile.mww .
+# Run:   docker run --gpus all -v /opt/ai/wakeword-train:/workspace mww-train
+
+FROM python:3.13-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    espeak-ng sox libsox-fmt-all libsndfile1 git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/requirements-mww.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+WORKDIR /workspace
+ENTRYPOINT ["python3"]

@@ -1,0 +1,23 @@
+# Training artifacts (large files, not tracked in git)
+artifacts/*/*.tflite
+artifacts/*/*.onnx
+artifacts/*/*.onnx.data
+artifacts/*/*.h5
+artifacts/*/*.pt
+artifacts/*/*.npy
+
+# Training data
+*.tar.gz
+hey_ara_training/positive/
+hey_ara_training/negative/
+hey_ara_training/LibriSpeech/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

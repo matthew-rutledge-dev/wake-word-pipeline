@@ -1,0 +1,15 @@
+word_id: hey_bender
+display_name: "Hey Bender"
+trained_languages:
+  - en
+positive_samples: 1500
+negative_samples: 3000
+piper_voices:
+  - en_US-hfc_female-medium
+  - en_US-lessac-medium
+espeak_voices:
+  - en
+  - en-us
+  - en-gb
+notes: |
+  Second priority. Both OWW and mWW training required.
