@@ -76,6 +76,36 @@ def ensure_piper_setup(cfg: dict):
     return model_path
 
 
+TARGET_SR = 16000
+
+
+def resample_to_16k(output_dir: Path):
+    """Resample all WAV files in output_dir to 16kHz mono if not already."""
+    import torchaudio
+    import soundfile as sf
+
+    wavs = list(output_dir.glob("*.wav"))
+    if not wavs:
+        return
+    # Check first file
+    info = torchaudio.info(str(wavs[0]))
+    if info.sample_rate == TARGET_SR:
+        return
+
+    src_sr = info.sample_rate
+    log.info("Resampling %d files from %d Hz → %d Hz", len(wavs), src_sr, TARGET_SR)
+    resampler = torchaudio.transforms.Resample(orig_freq=src_sr, new_freq=TARGET_SR)
+
+    for wav_path in wavs:
+        data, sr = torchaudio.load(str(wav_path))
+        if sr != TARGET_SR:
+            data = resampler(data)
+        # Ensure mono
+        if data.shape[0] > 1:
+            data = data.mean(dim=0, keepdim=True)
+        sf.write(str(wav_path), data.squeeze().numpy(), TARGET_SR, subtype="PCM_16")
+
+
 def generate_piper_samples(
     phrases: list[str],
     output_dir: Path,
@@ -113,6 +143,10 @@ def generate_piper_samples(
         file_names=[uuid.uuid4().hex + ".wav" for _ in range(needed)],
     )
     torch.cuda.empty_cache()
+
+    # Resample to 16kHz if needed (OWW expects 16000 Hz)
+    resample_to_16k(output_dir)
+
     generated = len(list(output_dir.glob("*.wav")))
     log.info("Total samples in %s: %d", output_dir.name, generated)
 
