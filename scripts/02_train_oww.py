@@ -203,8 +203,8 @@ def augment_and_compute_features(oww_config: dict, device: str):
             clips,
             total_length=total_length,
             batch_size=aug_batch,
-            background_clip_paths=background_paths if background_paths else None,
-            RIR_paths=rir_paths if rir_paths else None,
+            background_clip_paths=background_paths,
+            RIR_paths=rir_paths,
         )
 
         compute_features_from_generator(
