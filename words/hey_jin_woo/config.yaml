@@ -1,0 +1,48 @@
+word_id: hey_jin_woo
+display_name: "Hey Jin Woo"
+trained_languages:
+  - en
+
+piper:
+  batch_size: 50
+  length_scales:
+  - 0.75
+  - 1.0
+  - 1.25
+  model: en_US-libritts_r-medium.pt
+  model_url: https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt
+  noise_scale_ws:
+  - 0.98
+  noise_scales:
+  - 0.98
+
+espeak:
+  voices:
+  - en
+  - en-us
+  - en-gb
+
+samples:
+  negative_train: 20000
+  negative_val: 2000
+  positive_train: 20000
+  positive_val: 2000
+
+augmentation:
+  batch_size: 16
+  rounds: 2
+
+oww:
+  layer_size: 32
+  max_negative_weight: 1500
+  model_type: dnn
+  steps: 50000
+  target_fp_per_hour: 0.2
+
+custom_negative_phrases:
+  - "hey jin who"
+  - "hey jingle"
+  - "hey gym woo"
+
+notes: |
+  Future batch. Created 2026-03-25.
