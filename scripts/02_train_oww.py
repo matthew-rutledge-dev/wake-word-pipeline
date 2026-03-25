@@ -92,6 +92,28 @@ def build_oww_training_config(cfg: dict, artifact_dir: Path) -> dict:
     }
 
 
+def _resample_dir_to_16k(directory: Path):
+    """Resample all WAV files in directory (recursively) to 16kHz mono."""
+    import torchaudio
+    import soundfile as sf
+
+    wavs = list(directory.rglob("*.wav"))
+    if not wavs:
+        return
+    data0, sr0 = torchaudio.load(str(wavs[0]))
+    if sr0 == 16000:
+        return
+    log.info("Resampling %d files in %s from %dHz to 16kHz", len(wavs), directory.name, sr0)
+    resampler = torchaudio.transforms.Resample(orig_freq=sr0, new_freq=16000)
+    for wav_path in wavs:
+        data, sr = torchaudio.load(str(wav_path))
+        if sr != 16000:
+            data = torchaudio.transforms.Resample(orig_freq=sr, new_freq=16000)(data)
+        if data.shape[0] > 1:
+            data = data.mean(dim=0, keepdim=True)
+        sf.write(str(wav_path), data.squeeze().numpy(), 16000, subtype="PCM_16")
+
+
 def download_data_assets(artifact_dir: Path):
     """Download background noise, RIR data, validation features, and OWW feature models if missing."""
     import subprocess
@@ -120,6 +142,8 @@ def download_data_assets(artifact_dir: Path):
                 check=True,
             )
             (rir_dir / "mit_rirs.zip").unlink(missing_ok=True)
+            # Resample RIR files to 16kHz (MIT RIRs are 32kHz)
+            _resample_dir_to_16k(rir_dir)
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             log.warning("RIR download failed: %s — augmentation will skip RIR", e)
 
