@@ -116,37 +116,68 @@ def _resample_dir_to_16k(directory: Path):
 
 
 def download_data_assets(artifact_dir: Path):
-    """Download background noise, RIR data, validation features, and OWW feature models if missing."""
+    """Download background noise, RIR data, validation features, and OWW feature models if missing.
+
+    Shared assets (validation features, RIR data) are downloaded once to
+    ``artifacts/.shared/`` and symlinked into each word's artifact directory to
+    avoid redundant 17 GB downloads per word.
+    """
     import subprocess
 
     # Download OWW feature extraction models (melspectrogram.onnx, embedding_model.onnx)
     from openwakeword.utils import download_models
     download_models(model_names=[])
 
+    shared_dir = artifact_dir.parent / ".shared"
+    shared_dir.mkdir(parents=True, exist_ok=True)
+
     rir_dir = artifact_dir / "rir_data"
     bg_dir = artifact_dir / "background_data"
     val_path = artifact_dir / "validation_set_features.npy"
 
-    # Download MIT RIR dataset if missing
-    if not rir_dir.exists() or not list(rir_dir.glob("*.wav")):
-        log.info("Downloading room impulse response data...")
-        rir_dir.mkdir(parents=True, exist_ok=True)
+    # --- Shared RIR data (download once, symlink per word) ---
+    shared_rir = shared_dir / "rir_data"
+    rir_lock = shared_dir / ".rir_data.lock"
+    if not shared_rir.exists() or not list(shared_rir.rglob("*.wav")):
+        # Use lock file to prevent concurrent downloads from parallel processes
         try:
-            subprocess.run(
-                ["wget", "-q", "-O", str(rir_dir / "mit_rirs.zip"),
-                 "https://mcdermottlab.mit.edu/Reverb/IRMAudio/Audio.zip"],
-                check=True, timeout=300,
-            )
-            subprocess.run(
-                ["unzip", "-q", "-o", str(rir_dir / "mit_rirs.zip"),
-                 "-d", str(rir_dir)],
-                check=True,
-            )
-            (rir_dir / "mit_rirs.zip").unlink(missing_ok=True)
-            # Resample RIR files to 16kHz (MIT RIRs are 32kHz)
-            _resample_dir_to_16k(rir_dir)
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            log.warning("RIR download failed: %s — augmentation will skip RIR", e)
+            fd = os.open(str(rir_lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.close(fd)
+        except FileExistsError:
+            log.info("Another process is downloading RIR data — waiting...")
+            import time
+            for _ in range(120):
+                time.sleep(5)
+                if list(shared_rir.rglob("*.wav")):
+                    break
+        else:
+            log.info("Downloading room impulse response data to shared cache...")
+            shared_rir.mkdir(parents=True, exist_ok=True)
+            try:
+                subprocess.run(
+                    ["wget", "-q", "-O", str(shared_rir / "mit_rirs.zip"),
+                     "https://mcdermottlab.mit.edu/Reverb/IRMAudio/Audio.zip"],
+                    check=True, timeout=300,
+                )
+                subprocess.run(
+                    ["unzip", "-q", "-o", str(shared_rir / "mit_rirs.zip"),
+                     "-d", str(shared_rir)],
+                    check=True,
+                )
+                (shared_rir / "mit_rirs.zip").unlink(missing_ok=True)
+                _resample_dir_to_16k(shared_rir)
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                log.warning("RIR download failed: %s — augmentation will skip RIR", e)
+            finally:
+                rir_lock.unlink(missing_ok=True)
+
+    # Symlink per-word rir_data → shared copy
+    if not rir_dir.exists() and shared_rir.exists():
+        rir_dir.symlink_to(shared_rir)
+        log.info("Linked %s → %s", rir_dir, shared_rir)
+    elif not rir_dir.is_symlink() and rir_dir.is_dir() and shared_rir.exists():
+        # Word already has its own copy — leave it
+        pass
 
     # Create placeholder background dir if missing
     if not bg_dir.exists():
@@ -158,22 +189,29 @@ def download_data_assets(artifact_dir: Path):
             bg_dir,
         )
 
-    # Download validation features if missing
-    if not val_path.exists():
-        log.info("Downloading pre-computed OWW validation features (~200MB)...")
+    # --- Shared validation features (download once, symlink per word) ---
+    shared_val = shared_dir / "validation_set_features.npy"
+    if not shared_val.exists():
+        log.info("Downloading pre-computed OWW validation features to shared cache (~17 GB)...")
         try:
             from huggingface_hub import hf_hub_download
             downloaded = hf_hub_download(
                 repo_id="davidscripka/openwakeword_features",
                 filename="openwakeword_features_ACAV100M_2000_hrs_16bit.npy",
-                local_dir=str(artifact_dir),
+                local_dir=str(shared_dir),
                 repo_type="dataset",
             )
-            os.rename(downloaded, str(val_path))
+            os.rename(downloaded, str(shared_val))
+            log.info("Validation features cached at %s", shared_val)
         except Exception as e:
             log.warning("Validation features download failed: %s", e)
             log.info("Creating minimal placeholder validation features")
-            np.save(str(val_path), np.zeros((100, 96), dtype=np.float32))
+            np.save(str(shared_val), np.zeros((100, 96), dtype=np.float32))
+
+    # Symlink per-word validation features → shared copy
+    if not val_path.exists() and shared_val.exists():
+        val_path.symlink_to(shared_val)
+        log.info("Linked %s → %s", val_path, shared_val)
 
 
 def augment_and_compute_features(oww_config: dict, device: str):
