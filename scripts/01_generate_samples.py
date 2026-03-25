@@ -9,6 +9,7 @@ Usage: python 01_generate_samples.py <word_id> [--engine piper|espeak]
 """
 import _compat  # noqa: F401 — must be first
 import argparse
+from _metrics import MetricsCollector
 import logging
 import os
 import sys

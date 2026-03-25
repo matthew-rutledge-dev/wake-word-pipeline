@@ -9,6 +9,7 @@ Usage: python 02_train_oww.py <word_id>
 """
 import _compat  # noqa: F401 — must be first
 import argparse
+from _metrics import MetricsCollector
 import json
 import logging
 import os
