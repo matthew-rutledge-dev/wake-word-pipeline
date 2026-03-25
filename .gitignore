@@ -1,3 +1,4 @@
+artifacts/
 # Training artifacts (large files, not tracked in git)
 artifacts/**/*.tflite
 artifacts/**/*.onnx
