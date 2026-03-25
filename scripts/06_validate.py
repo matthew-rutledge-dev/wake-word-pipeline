@@ -3,9 +3,11 @@
 Validate trained model: shape check, smoke test, and detection test on
 generated positive samples.
 
-For OWW models: loads via openWakeWord and runs predict_clip on test samples.
-For mWW models: loads TFLite and runs inference on test samples.
-GPU used for OWW inference if available.
+For OWW models: prefers ONNX format when GPU is available (via onnxruntime
+CUDAExecutionProvider), falls back to TFLite on CPU. After loading via
+openWakeWord, the ONNX inference session is upgraded to GPU providers if
+detected.
+For mWW models: loads TFLite and runs inference on test samples (CPU only).
 
 Usage: python 06_validate.py <word_id> [oww|mww]
 """
@@ -28,6 +30,18 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_DIR = SCRIPT_DIR.parent
 
 
+def _detect_gpu_providers():
+    """Return onnxruntime GPU providers if available, else None."""
+    try:
+        import onnxruntime as ort
+        available = ort.get_available_providers()
+        if "CUDAExecutionProvider" in available:
+            return ["CUDAExecutionProvider", "CPUExecutionProvider"]
+    except ImportError:
+        pass
+    return None
+
+
 def load_config(word_id: str) -> dict:
     cfg_path = REPO_DIR / "words" / word_id / "config.yaml"
     with open(cfg_path) as f:
@@ -35,14 +49,25 @@ def load_config(word_id: str) -> dict:
 
 
 def validate_oww(word_id: str, artifact_dir: Path):
-    """Validate OWW model by running detection on positive samples."""
+    """Validate OWW model by running detection on positive samples.
+
+    Prefers ONNX when GPU providers are available (CUDAExecutionProvider);
+    falls back to TFLite on CPU. After loading via openWakeWord (which
+    hardcodes CPUExecutionProvider), the ONNX session is replaced with a
+    GPU-enabled session.
+    """
     from openwakeword.model import Model as OWWModel
 
     tflite_path = artifact_dir / "oww" / f"{word_id}.tflite"
     onnx_path = artifact_dir / "oww" / f"{word_id}.onnx"
 
-    # Prefer TFLite, fall back to ONNX
-    if tflite_path.exists():
+    gpu_providers = _detect_gpu_providers()
+
+    # Prefer ONNX when GPU is available; fall back to TFLite otherwise
+    if gpu_providers and onnx_path.exists():
+        model_path = str(onnx_path)
+        framework = "onnx"
+    elif tflite_path.exists():
         model_path = str(tflite_path)
         framework = "tflite"
     elif onnx_path.exists():
@@ -54,6 +79,19 @@ def validate_oww(word_id: str, artifact_dir: Path):
 
     log.info("Loading OWW model: %s (framework=%s)", Path(model_path).name, framework)
     model = OWWModel(wakeword_models=[model_path], inference_framework=framework)
+
+    # Upgrade ONNX sessions to GPU providers (OWW hardcodes CPUExecutionProvider)
+    if framework == "onnx" and gpu_providers:
+        import onnxruntime as ort
+        for mdl_name in list(model.models.keys()):
+            session_opts = ort.SessionOptions()
+            session_opts.inter_op_num_threads = 1
+            session_opts.intra_op_num_threads = 1
+            model.models[mdl_name] = ort.InferenceSession(
+                model_path, sess_options=session_opts, providers=gpu_providers,
+            )
+            active = model.models[mdl_name].get_providers()
+            log.info("Upgraded %s to providers: %s", mdl_name, active)
 
     # Test on positive validation samples
     pos_val_dir = artifact_dir / "positive_val"
@@ -70,15 +108,16 @@ def validate_oww(word_id: str, artifact_dir: Path):
 
     for wav_path in wav_files:
         try:
-            result = model.predict_clip(str(wav_path))
+            frames = model.predict_clip(str(wav_path))
             max_score = 0.0
-            for mdl_name, scores in result.items():
-                if isinstance(scores, dict):
-                    for label, frame_scores in scores.items():
-                        frame_max = max(frame_scores) if frame_scores else 0.0
-                        max_score = max(max_score, frame_max)
-                elif isinstance(scores, (list, np.ndarray)):
-                    max_score = max(max_score, max(scores) if len(scores) > 0 else 0.0)
+            for frame in frames:
+                for mdl_name, score in frame.items():
+                    if isinstance(score, (int, float)):
+                        max_score = max(max_score, score)
+                    elif isinstance(score, dict):
+                        for v in score.values():
+                            if isinstance(v, (int, float)):
+                                max_score = max(max_score, v)
             if max_score >= 0.5:
                 detections += 1
         except Exception as e:

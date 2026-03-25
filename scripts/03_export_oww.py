@@ -2,9 +2,9 @@
 """
 Export trained OWW model to ONNX + TFLite.
 
-TFLite conversion requires CPU-only TensorFlow, so CUDA_VISIBLE_DEVICES is
-forced to -1. The ONNX model from training is converted to TFLite format
-and validated for correct input/output shapes.
+ONNX-to-TFLite conversion is a graph transformation that does not benefit
+from GPU. CUDA_VISIBLE_DEVICES is set to -1 to prevent TensorFlow from
+allocating GPU memory while other pipeline scripts may be training.
 
 Usage: python 03_export_oww.py <word_id>
 """

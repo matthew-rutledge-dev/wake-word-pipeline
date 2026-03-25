@@ -7,10 +7,45 @@ Fixes:
   - torchaudio 2.11+ removed list_audio_backends() (needed by speechbrain)
   - scipy 1.14+ removed sph_harm from scipy.special (needed by acoustics)
   - piper_train is a top-level package inside piper-sample-generator repo
+  - nvidia pip packages (cublas, cudnn, etc.) need LD_LIBRARY_PATH for onnxruntime GPU
 """
 import os
 import sys
 from pathlib import Path
+
+
+def _configure_nvidia_lib_path():
+    """Pre-load CUDA 12 / cuDNN 9 shared libs from nvidia pip packages so
+    onnxruntime-gpu can find them via dlopen(). Setting LD_LIBRARY_PATH at
+    Python runtime does not work (glibc caches it at process start), so we
+    use ctypes.CDLL with RTLD_GLOBAL instead. No-op on Windows or when the
+    nvidia packages are not installed."""
+    if sys.platform == "win32":
+        return
+    try:
+        import ctypes
+        import nvidia
+        nvidia_root = Path(nvidia.__path__[0])
+    except (ImportError, AttributeError, IndexError):
+        return
+    libs = [
+        "cuda_runtime/lib/libcudart.so.12",
+        "cublas/lib/libcublasLt.so.12",
+        "cublas/lib/libcublas.so.12",
+        "cudnn/lib/libcudnn.so.9",
+        "cufft/lib/libcufft.so.11",
+        "curand/lib/libcurand.so.10",
+    ]
+    for rel in libs:
+        lib_path = nvidia_root / rel
+        if lib_path.exists():
+            try:
+                ctypes.CDLL(str(lib_path), mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                pass
+
+
+_configure_nvidia_lib_path()
 
 
 def apply():
