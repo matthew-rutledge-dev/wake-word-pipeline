@@ -81,29 +81,65 @@ TARGET_SR = 16000
 
 
 def resample_to_16k(output_dir: Path):
-    """Resample all WAV files in output_dir to 16kHz mono if not already."""
+    """Resample all WAV files in output_dir to 16kHz mono.
+
+    Uses GPU batched resampling when CUDA is available, falls back to
+    single-file CPU resampling otherwise.  I/O is parallelised with a
+    thread pool in both paths.
+    """
     import torchaudio
     import soundfile as sf
+    from concurrent.futures import ThreadPoolExecutor
 
     wavs = list(output_dir.glob("*.wav"))
     if not wavs:
         return
-    # Check first file sample rate
     data0, sr0 = torchaudio.load(str(wavs[0]))
     if sr0 == TARGET_SR:
         return
 
-    log.info("Resampling %d files from %d Hz → %d Hz", len(wavs), sr0, TARGET_SR)
-    resampler = torchaudio.transforms.Resample(orig_freq=sr0, new_freq=TARGET_SR)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    resampler = torchaudio.transforms.Resample(
+        orig_freq=sr0, new_freq=TARGET_SR,
+    ).to(device)
+    log.info("Resampling %d files from %d Hz -> %d Hz (device=%s)",
+             len(wavs), sr0, TARGET_SR, device)
 
-    for wav_path in wavs:
-        data, sr = torchaudio.load(str(wav_path))
-        if sr != TARGET_SR:
-            data = resampler(data)
-        # Ensure mono
-        if data.shape[0] > 1:
-            data = data.mean(dim=0, keepdim=True)
-        sf.write(str(wav_path), data.squeeze().numpy(), TARGET_SR, subtype="PCM_16")
+    BATCH_SIZE = 512
+    ratio = TARGET_SR / sr0
+
+    def _load_wav(path):
+        d, _ = torchaudio.load(str(path))
+        if d.shape[0] > 1:
+            d = d.mean(dim=0, keepdim=True)
+        return d
+
+    def _write_wav(args):
+        path, data_np = args
+        sf.write(str(path), data_np, TARGET_SR, subtype="PCM_16")
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for batch_start in range(0, len(wavs), BATCH_SIZE):
+            batch_paths = wavs[batch_start : batch_start + BATCH_SIZE]
+
+            # Parallel load
+            tensors = list(pool.map(_load_wav, batch_paths))
+            lengths = [t.shape[1] for t in tensors]
+            max_len = max(lengths)
+
+            # Pad, stack, resample on device
+            padded = torch.zeros(len(tensors), 1, max_len)
+            for j, t in enumerate(tensors):
+                padded[j, :, : t.shape[1]] = t
+
+            resampled = resampler(padded.to(device)).cpu()
+
+            # Parallel write (trim padding per original length)
+            write_args = []
+            for j, p in enumerate(batch_paths):
+                new_len = int(lengths[j] * ratio)
+                write_args.append((p, resampled[j, :, :new_len].squeeze().numpy()))
+            list(pool.map(_write_wav, write_args))
 
 
 def generate_piper_samples(
