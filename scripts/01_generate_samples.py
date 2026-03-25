@@ -87,14 +87,13 @@ def resample_to_16k(output_dir: Path):
     wavs = list(output_dir.glob("*.wav"))
     if not wavs:
         return
-    # Check first file
-    info = torchaudio.info(str(wavs[0]))
-    if info.sample_rate == TARGET_SR:
+    # Check first file sample rate
+    data0, sr0 = torchaudio.load(str(wavs[0]))
+    if sr0 == TARGET_SR:
         return
 
-    src_sr = info.sample_rate
-    log.info("Resampling %d files from %d Hz → %d Hz", len(wavs), src_sr, TARGET_SR)
-    resampler = torchaudio.transforms.Resample(orig_freq=src_sr, new_freq=TARGET_SR)
+    log.info("Resampling %d files from %d Hz → %d Hz", len(wavs), sr0, TARGET_SR)
+    resampler = torchaudio.transforms.Resample(orig_freq=sr0, new_freq=TARGET_SR)
 
     for wav_path in wavs:
         data, sr = torchaudio.load(str(wav_path))
