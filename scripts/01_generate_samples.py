@@ -238,6 +238,8 @@ def main():
 
     cfg = load_config(args.word_id)
     device = detect_device()
+    mc = MetricsCollector(word_id=args.word_id, phase="01_gen")
+    mc.start()
     target_phrase = cfg["display_name"].lower()
     samples = cfg["samples"]
     custom_negs = cfg.get("custom_negative_phrases", [])
@@ -296,6 +298,7 @@ def main():
         n = len(list(d.glob("*.wav"))) if d.exists() else 0
         log.info("  %s: %d files", d.name, n)
 
+    mc.stop()
     log.info("Sample generation complete for '%s'", cfg["display_name"])
 
 

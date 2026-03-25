@@ -291,20 +291,42 @@ def train_model(oww_config: dict, device: str, artifact_dir: Path):
     if neg_val.exists():
         val_data_files["0"] = str(neg_val)
 
-    X_val = mmap_batch_generator(data_files=val_data_files) if val_data_files else None
+    # Validation data - must be FINITE (mmap_batch_generator is infinite)
+    X_val = None
+    if val_data_files:
+        _val_arrays = []
+        _val_labels = []
+        for lbl, fpath in val_data_files.items():
+            arr = np.array(np.load(fpath, mmap_mode="r"))
+            _val_arrays.append(arr)
+            _val_labels.append(np.full(arr.shape[0], float(lbl)))
+        _x_val = np.concatenate(_val_arrays)
+        _y_val = np.concatenate(_val_labels)
+        X_val = torch.utils.data.DataLoader(
+            torch.utils.data.TensorDataset(
+                torch.from_numpy(_x_val).float(),
+                torch.from_numpy(_y_val).float(),
+            ),
+            batch_size=len(_y_val),
+        )
+        log.info("Validation DataLoader: %d samples", len(_y_val))
 
-    # False positive validation data
+    # False positive validation data - chunked to avoid OOM on large files
     X_val_fp = None
     if Path(fp_val_path).exists():
-        fp_features = np.load(fp_val_path, mmap_mode="r")
-        labels = np.zeros(fp_features.shape[0])
-        X_val_fp = torch.utils.data.DataLoader(
-            torch.utils.data.TensorDataset(
-                torch.from_numpy(np.array(fp_features)),
-                torch.from_numpy(labels),
-            ),
-            batch_size=len(labels),
-        )
+        class _ChunkedFPDataset(torch.utils.data.IterableDataset):
+            def __init__(self, path, chunk_size=8192):
+                self._data = np.load(path, mmap_mode="r")
+                self._n = self._data.shape[0]
+                self._chunk = chunk_size
+            def __iter__(self):
+                for start in range(0, self._n, self._chunk):
+                    chunk = np.array(self._data[start:start+self._chunk])
+                    x = torch.from_numpy(chunk).float()
+                    y = torch.zeros(x.shape[0])
+                    yield x, y
+        fp_ds = _ChunkedFPDataset(fp_val_path, chunk_size=8192)
+        X_val_fp = torch.utils.data.DataLoader(fp_ds, batch_size=None, num_workers=0)
 
     # Determine input shape from feature files
     sample_features = np.load(str(pos_train), mmap_mode="r")
@@ -360,6 +382,8 @@ def main():
     (artifact_dir / "oww").mkdir(parents=True, exist_ok=True)
 
     oww_config = build_oww_training_config(cfg, artifact_dir)
+    mc = MetricsCollector(word_id=cfg["word_id"], phase="02_train")
+    mc.start()
 
     # Download training data assets
     download_data_assets(artifact_dir)
@@ -373,6 +397,7 @@ def main():
     # Train model
     train_model(oww_config, device, artifact_dir)
 
+    mc.stop()
     log.info("OWW training complete for '%s'", cfg["display_name"])
 
 

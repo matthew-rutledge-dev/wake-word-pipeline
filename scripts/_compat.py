@@ -43,3 +43,26 @@ def apply():
 
 # Auto-apply on import
 apply()
+
+
+def _patch_mmap_batch_generator():
+    """Patch mmap_batch_generator.__next__ to return torch tensors instead of numpy arrays.
+    OWW 0.6.0 data.py returns numpy from __next__ but train.py:449 calls .to(device)."""
+    try:
+        import torch
+        from openwakeword.data import mmap_batch_generator
+
+        _orig_next = mmap_batch_generator.__next__
+
+        def _tensor_next(self):
+            import numpy as np_compat
+            x, y = _orig_next(self)
+            if y.dtype.kind in ('U', 'S', 'O'):
+                y = y.astype(np_compat.float32)
+            return torch.from_numpy(x).float(), torch.from_numpy(y).float()
+
+        mmap_batch_generator.__next__ = _tensor_next
+    except ImportError:
+        pass
+
+_patch_mmap_batch_generator()
