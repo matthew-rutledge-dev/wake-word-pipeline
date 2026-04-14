@@ -22,10 +22,10 @@ espeak:
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
 augmentation:
-  rounds: 2
+  rounds: 3
   batch_size: 16
 oww:
   model_type: dnn
@@ -34,8 +34,23 @@ oww:
   max_negative_weight: 1500
   target_fp_per_hour: 0.2
 custom_negative_phrases:
-- hey sponge
+- a spongebob
+- bay spongebob
+- day spongebob
 - hey bob
-- hey squarepants
-- spongebob
+- hey sponge
+- hey sponge bob
+- hey sponge job
+- hey sponge knob
+- hey sponge mob
 - hey sponge pop
+- hey squarepants
+- may spongebob
+- my spongebob
+- pay spongebob
+- say spongebob
+- spongebob
+- spongebob is
+- the spongebob
+- they spongebob
+- way spongebob

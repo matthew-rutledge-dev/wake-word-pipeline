@@ -1,54 +1,64 @@
 word_id: hey_ara
-display_name: "Hey Ara"
+display_name: Hey Ara
 trained_languages:
-  - en
-
-# Piper TTS configuration (PRIMARY — GPU accelerated, neural speech)
+- en
 piper:
-  model: "en_US-libritts_r-medium.pt"
-  model_url: "https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt"
-  noise_scales: [0.98]
-  noise_scale_ws: [0.98]
-  length_scales: [0.75, 1.0, 1.25]
+  model: en_US-libritts_r-medium.pt
+  model_url: https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt
+  noise_scales:
+  - 0.98
+  noise_scale_ws:
+  - 0.98
+  length_scales:
+  - 0.75
+  - 1.0
+  - 1.25
   batch_size: 50
-
-# espeak-ng configuration (FALLBACK — CPU only, formant synthesis)
 espeak:
   voices:
-    - en
-    - en-us
-    - en-gb
-
-# Sample generation counts
+  - en
+  - en-us
+  - en-gb
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
-
-# Data augmentation
 augmentation:
-  rounds: 2
+  rounds: 3
   batch_size: 16
-
-# OWW model training
 oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
   max_negative_weight: 1500
   target_fp_per_hour: 0.2
-
-# Known false-positive phrases to generate adversarial negatives for
 custom_negative_phrases:
-  - "hey arrow"
-  - "hey aura"
-  - "hey air"
-  - "hey era"
-  - "hey aura"
-  - "a ra"
+- a ara
+- a ra
+- ara is
+- bay ara
+- day ara
+- hey air
+- hey area
+- hey arrow
+- hey aura
+- hey era
+- hey error
+- hey ira
+- hey sarah
+- hey tara
+- may ara
+- my ara
+- pay ara
+- say ara
+- the ara
+- they ara
+- way ara
+notes: 'First wake word. Initial OWW model trained with espeak-ng (828KB TFLite).
 
-notes: |
-  First wake word. Initial OWW model trained with espeak-ng (828KB TFLite).
   Retraining with Piper TTS for improved generalization.
+
   mWW retrain required for HA Voice PE firmware.
+
+  '

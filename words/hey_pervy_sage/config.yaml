@@ -1,8 +1,7 @@
 word_id: hey_pervy_sage
-display_name: "Hey Pervy Sage"
+display_name: Hey Pervy Sage
 trained_languages:
-  - en
-
+- en
 piper:
   batch_size: 50
   length_scales:
@@ -15,34 +14,42 @@ piper:
   - 0.98
   noise_scales:
   - 0.98
-
 espeak:
   voices:
   - en
   - en-us
   - en-gb
-
 samples:
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
   positive_train: 20000
   positive_val: 2000
-
 augmentation:
   batch_size: 16
-  rounds: 2
-
+  rounds: 3
 oww:
   layer_size: 32
   max_negative_weight: 1500
   model_type: dnn
   steps: 50000
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "hey pervy page"
-  - "hey curvy sage"
-  - "hey nervy sage"
+- a pervy sage
+- bay pervy sage
+- day pervy sage
+- hey curvy sage
+- hey nervy sage
+- hey perfect age
+- hey pervy page
+- hey survey sage
+- may pervy sage
+- my pervy sage
+- pay pervy sage
+- pervy sage is
+- say pervy sage
+- the pervy sage
+- they pervy sage
+- way pervy sage
+notes: 'Future batch. Created 2026-03-25.
 
-notes: |
-  Future batch. Created 2026-03-25.
+  '

@@ -1,8 +1,7 @@
 word_id: hey_jin_woo
-display_name: "Hey Jin Woo"
+display_name: Hey Jin Woo
 trained_languages:
-  - en
-
+- en
 piper:
   batch_size: 50
   length_scales:
@@ -15,34 +14,44 @@ piper:
   - 0.98
   noise_scales:
   - 0.98
-
 espeak:
   voices:
   - en
   - en-us
   - en-gb
-
 samples:
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
   positive_train: 20000
   positive_val: 2000
-
 augmentation:
   batch_size: 16
-  rounds: 2
-
+  rounds: 3
 oww:
   layer_size: 32
   max_negative_weight: 1500
   model_type: dnn
   steps: 50000
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "hey jin who"
-  - "hey jingle"
-  - "hey gym woo"
+- a jin woo
+- bay jin woo
+- day jin woo
+- hey did you
+- hey gin woo
+- hey gym woo
+- hey in two
+- hey jin who
+- hey jingle
+- hey went to
+- jin woo is
+- may jin woo
+- my jin woo
+- pay jin woo
+- say jin woo
+- the jin woo
+- they jin woo
+- way jin woo
+notes: 'Future batch. Created 2026-03-25.
 
-notes: |
-  Future batch. Created 2026-03-25.
+  '

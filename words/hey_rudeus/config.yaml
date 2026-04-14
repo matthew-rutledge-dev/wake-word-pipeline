@@ -1,8 +1,7 @@
 word_id: hey_rudeus
-display_name: "Hey Rudeus"
+display_name: Hey Rudeus
 trained_languages:
-  - en
-
+- en
 piper:
   batch_size: 50
   length_scales:
@@ -15,34 +14,43 @@ piper:
   - 0.98
   noise_scales:
   - 0.98
-
 espeak:
   voices:
   - en
   - en-us
   - en-gb
-
 samples:
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
   positive_train: 20000
   positive_val: 2000
-
 augmentation:
   batch_size: 16
-  rounds: 2
-
+  rounds: 3
 oww:
   layer_size: 32
   max_negative_weight: 1500
   model_type: dnn
   steps: 50000
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "hey rude us"
-  - "hey root us"
-  - "hey reduce"
+- a rudeus
+- bay rudeus
+- day rudeus
+- hey prudent
+- hey reduce
+- hey root us
+- hey rude us
+- hey rude yes
+- hey who does
+- may rudeus
+- my rudeus
+- pay rudeus
+- rudeus is
+- say rudeus
+- the rudeus
+- they rudeus
+- way rudeus
+notes: 'Future batch. Created 2026-03-25.
 
-notes: |
-  Future batch. Created 2026-03-25.
+  '

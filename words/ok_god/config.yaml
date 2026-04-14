@@ -1,8 +1,7 @@
 word_id: ok_god
-display_name: "Ok God"
+display_name: Ok God
 trained_languages:
-  - en
-
+- en
 piper:
   batch_size: 50
   length_scales:
@@ -15,34 +14,41 @@ piper:
   - 0.98
   noise_scales:
   - 0.98
-
 espeak:
   voices:
   - en
   - en-us
   - en-gb
-
 samples:
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
   positive_train: 20000
   positive_val: 2000
-
 augmentation:
   batch_size: 16
-  rounds: 2
-
+  rounds: 3
 oww:
   layer_size: 32
   max_negative_weight: 1500
   model_type: dnn
   steps: 50000
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "ok got"
-  - "ok guard"
-  - "ok gone"
+- a god
+- awk god
+- god is
+- oak god
+- oh god
+- ok dog
+- ok god is
+- ok gone
+- ok good
+- ok got
+- ok guard
+- ok odd
+- okay god
+- the god
+- uh god
+notes: 'Future batch. Created 2026-03-25.
 
-notes: |
-  Future batch. Created 2026-03-25.
+  '

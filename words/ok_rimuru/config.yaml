@@ -1,41 +1,51 @@
 word_id: ok_rimuru
-display_name: "OK Rimuru"
+display_name: OK Rimuru
 trained_languages:
-  - en
-
+- en
 piper:
-  model: "en_US-libritts_r-medium.pt"
-  model_url: "https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt"
-  noise_scales: [0.98]
-  noise_scale_ws: [0.98]
-  length_scales: [0.75, 1.0, 1.25]
+  model: en_US-libritts_r-medium.pt
+  model_url: https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt
+  noise_scales:
+  - 0.98
+  noise_scale_ws:
+  - 0.98
+  length_scales:
+  - 0.75
+  - 1.0
+  - 1.25
   batch_size: 50
-
 espeak:
   voices:
-    - en
-    - en-us
-    - en-gb
-
+  - en
+  - en-us
+  - en-gb
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
-
 augmentation:
-  rounds: 2
+  rounds: 3
   batch_size: 16
-
 oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
   max_negative_weight: 1500
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "okay ri muru"
-  - "okay remora"
-  - "okay rimmer"
-  - "oh rimuru"
+- a rimuru
+- awk rimuru
+- oak rimuru
+- oh rimuru
+- ok ream you
+- ok remove
+- ok rim or
+- ok rio maru
+- okay remora
+- okay ri muru
+- okay rimmer
+- okay rimuru
+- rimuru is
+- the rimuru
+- uh rimuru

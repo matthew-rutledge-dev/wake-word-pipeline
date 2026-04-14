@@ -1,42 +1,54 @@
 word_id: hey_my_goddess
-display_name: "Hey My Goddess"
+display_name: Hey My Goddess
 trained_languages:
-  - en
-
+- en
 piper:
-  model: "en_US-libritts_r-medium.pt"
-  model_url: "https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt"
-  noise_scales: [0.98]
-  noise_scale_ws: [0.98]
-  length_scales: [0.75, 1.0, 1.25]
+  model: en_US-libritts_r-medium.pt
+  model_url: https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt
+  noise_scales:
+  - 0.98
+  noise_scale_ws:
+  - 0.98
+  length_scales:
+  - 0.75
+  - 1.0
+  - 1.25
   batch_size: 50
-
 espeak:
   voices:
-    - en
-    - en-us
-    - en-gb
-
+  - en
+  - en-us
+  - en-gb
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
-
 augmentation:
-  rounds: 2
+  rounds: 3
   batch_size: 16
-
 oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
   max_negative_weight: 1500
   target_fp_per_hour: 0.2
-
 custom_negative_phrases:
-  - "hey my goodness"
-  - "hey my god"
-  - "hey my godless"
-  - "hey my garden"
-  - "a my goddess"
+- a my goddess
+- bay my goddess
+- day my goddess
+- hey goddess
+- hey my garden
+- hey my god
+- hey my god is
+- hey my god yes
+- hey my godless
+- hey my goodness
+- may my goddess
+- my goddess is
+- my my goddess
+- pay my goddess
+- say my goddess
+- the my goddess
+- they my goddess
+- way my goddess

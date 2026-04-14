@@ -22,10 +22,10 @@ espeak:
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 20000
+  negative_train: 30000
   negative_val: 2000
 augmentation:
-  rounds: 2
+  rounds: 3
   batch_size: 16
 oww:
   model_type: dnn
@@ -34,8 +34,22 @@ oww:
   max_negative_weight: 1500
   target_fp_per_hour: 0.2
 custom_negative_phrases:
-- hey nato
+- a naruto
+- bay naruto
+- day naruto
+- hey burrito
+- hey narrate
+- hey narrow toe
 - hey narubu
 - hey narudo
-- hey toronto
+- hey nato
 - hey potato
+- hey toronto
+- may naruto
+- my naruto
+- naruto is
+- pay naruto
+- say naruto
+- the naruto
+- they naruto
+- way naruto
