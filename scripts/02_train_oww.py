@@ -420,6 +420,12 @@ def main():
     artifact_dir.mkdir(parents=True, exist_ok=True)
     (artifact_dir / "oww").mkdir(parents=True, exist_ok=True)
 
+    # Auto-invalidate caches if config changed
+    from _config_cache import check_and_invalidate_caches
+    invalidated = check_and_invalidate_caches(cfg, artifact_dir)
+    if invalidated.get("features"):
+        log.info("Feature cache invalidated — will regenerate during augmentation")
+
     oww_config = build_oww_training_config(cfg, artifact_dir)
     mc = MetricsCollector(word_id=cfg["word_id"], phase="02_train")
     mc.start()

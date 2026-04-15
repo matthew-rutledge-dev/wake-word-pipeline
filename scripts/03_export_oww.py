@@ -37,63 +37,73 @@ def load_config(word_id: str) -> dict:
 
 
 def convert_onnx_to_tflite(onnx_path: str, tflite_path: str):
-    """Convert ONNX model to TFLite format (CPU only)."""
+    """Convert OWW DNN ONNX model to TFLite format (CPU only).
+
+    Architecture: Reshape -> Gemm+LayerNorm+ReLU (xN blocks) -> Gemm+Sigmoid
+    """
     try:
         from openwakeword.train import convert_onnx_to_tflite as oww_convert
         oww_convert(onnx_path, tflite_path)
         return
-    except ImportError:
+    except (ImportError, AttributeError):
         pass
 
-    # Manual conversion fallback
     import onnx
     from onnx import numpy_helper
     import tensorflow as tf
 
-    log.info("Converting ONNX → TFLite manually")
+    log.info("Converting ONNX to TFLite (manual fallback)")
     onnx_model = onnx.load(onnx_path)
     graph = onnx_model.graph
-    input_shape = [d.dim_value for d in graph.input[0].type.tensor_type.shape.dim]
-
-    # Build equivalent TF model from ONNX weights
     weights = {init.name: numpy_helper.to_array(init) for init in graph.initializer}
 
-    layers = []
-    layers.append(tf.keras.layers.InputLayer(input_shape=input_shape[1:]))
-    layers.append(tf.keras.layers.Flatten())
+    # Collect Gemm and LayerNorm nodes in order
+    gemm_nodes = [n for n in graph.node if n.op_type == "Gemm"]
+    ln_nodes = [n for n in graph.node if n.op_type == "LayerNormalization"]
 
-    for node in graph.node:
-        if node.op_type == "MatMul":
-            w_name = node.input[1]
-            w = weights[w_name]
-            units = w.shape[1]
-            layers.append(tf.keras.layers.Dense(units, use_bias=False))
-        elif node.op_type == "Add":
-            pass  # bias handled by Dense
-        elif node.op_type == "Relu":
-            layers.append(tf.keras.layers.ReLU())
-        elif node.op_type == "Sigmoid":
-            layers.append(tf.keras.layers.Activation("sigmoid"))
+    # Build Keras functional model matching the ONNX graph
+    inp = tf.keras.Input(shape=(16, 96))
+    x = tf.keras.layers.Flatten()(inp)
 
-    model = tf.keras.Sequential(layers)
-    model.build(input_shape=[1] + input_shape[1:])
+    for gi, gemm in enumerate(gemm_nodes):
+        w = weights[gemm.input[1]]
+        units = w.shape[0]
+        has_bias = len(gemm.input) > 2 and gemm.input[2] in weights
+        is_last = (gi == len(gemm_nodes) - 1)
 
-    # Load weights
-    for i, layer in enumerate(model.layers):
-        if hasattr(layer, "kernel"):
-            for node in graph.node:
-                if node.op_type == "MatMul":
-                    w = weights[node.input[1]]
-                    b_name = None
-                    for n2 in graph.node:
-                        if n2.op_type == "Add" and node.output[0] in n2.input:
-                            b_name = [x for x in n2.input if x != node.output[0]][0]
-                            break
-                    if b_name and b_name in weights:
-                        layer.set_weights([w, weights[b_name]])
-                    else:
-                        layer.set_weights([w])
-                    break
+        dense = tf.keras.layers.Dense(
+            units, use_bias=has_bias,
+            activation="sigmoid" if is_last else None,
+            name=f"dense_{gi}",
+        )
+        x = dense(x)
+
+        # Set Dense weights (Gemm convention: weight is transposed)
+        w_list = [w.T]
+        if has_bias:
+            w_list.append(weights[gemm.input[2]])
+        dense.set_weights(w_list)
+
+        if not is_last and gi < len(ln_nodes):
+            ln = ln_nodes[gi]
+            ln_layer = tf.keras.layers.LayerNormalization(name=f"ln_{gi}")
+            x = ln_layer(x)
+            ln_layer.set_weights([weights[ln.input[1]], weights[ln.input[2]]])
+            x = tf.keras.layers.ReLU()(x)
+
+    model = tf.keras.Model(inputs=inp, outputs=x)
+
+    # Verify ONNX vs TF match
+    import onnxruntime as ort
+    sess = ort.InferenceSession(onnx_path)
+    input_name = graph.input[0].name
+    test_in = np.random.randn(1, 16, 96).astype(np.float32)
+    onnx_out = sess.run(None, {input_name: test_in})[0]
+    tf_out = model.predict(test_in, verbose=0)
+    diff = float(np.max(np.abs(onnx_out - tf_out)))
+    log.info("ONNX vs TF max diff: %.6f", diff)
+    if diff > 0.01:
+        raise ValueError(f"Model mismatch too large: {diff}")
 
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     tflite_model = converter.convert()

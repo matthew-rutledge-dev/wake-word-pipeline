@@ -274,6 +274,13 @@ def main():
     args = parser.parse_args()
 
     cfg = load_config(args.word_id)
+
+    # Auto-invalidate caches if config changed
+    from _config_cache import check_and_invalidate_caches
+    artifact_dir = REPO_DIR / "artifacts" / cfg["word_id"]
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    check_and_invalidate_caches(cfg, artifact_dir)
+
     device = detect_device()
     mc = MetricsCollector(word_id=args.word_id, phase="01_gen")
     mc.start()
