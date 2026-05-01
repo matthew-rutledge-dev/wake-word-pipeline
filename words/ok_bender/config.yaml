@@ -22,7 +22,7 @@ espeak:
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 30000
+  negative_train: 40000
   negative_val: 2000
 augmentation:
   rounds: 3
@@ -31,28 +31,62 @@ oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
-  max_negative_weight: 1500
+  max_negative_weight: 2500
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a bender
+- agenda
+- and render
 - awk bender
+- bartender
+- bay window
 - bender is
+- blender on
+- calendar
+- contender
+- cylinder
+- day ender
+- defender
+- end her
+- fender guitar
+- la la bender
+- lavender
 - oak bender
+- offender
 - oh bender
+- ok ben
 - ok blender
+- ok brother
+- ok buddy
+- ok everyone
 - ok fender
+- ok friend
 - ok gender
 - ok lender
+- ok man
 - ok mender
 - ok render
 - ok sender
 - ok spender
 - ok tender
+- ok there
 - ok vendor
+- ok what
+- ok wonder
 - okay bender
 - okay blender
 - okay render
 - okay sender
 - okay tender
+- pay vendor
+- pretender
+- remember
+- remember the
+- slender
+- splendor
+- surrender
+- surrender now
+- tender
 - the bender
+- the defender
 - uh bender

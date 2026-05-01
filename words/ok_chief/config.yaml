@@ -22,7 +22,7 @@ espeak:
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 30000
+  negative_train: 40000
   negative_val: 2000
 augmentation:
   rounds: 3
@@ -31,7 +31,7 @@ oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
-  max_negative_weight: 1500
+  max_negative_weight: 2500
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a chief

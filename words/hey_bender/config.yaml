@@ -22,7 +22,7 @@ espeak:
 samples:
   positive_train: 20000
   positive_val: 2000
-  negative_train: 30000
+  negative_train: 40000
   negative_val: 2000
 augmentation:
   rounds: 3
@@ -31,28 +31,63 @@ oww:
   model_type: dnn
   layer_size: 32
   steps: 50000
-  max_negative_weight: 1500
+  max_negative_weight: 2500
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a bender
+- agenda
+- and render
+- bartender
 - bay bender
+- bay window
 - bender is
+- blender on
+- calendar
+- contender
+- cylinder
 - day bender
+- day ender
+- defender
+- end her
+- fender guitar
+- hey ben
 - hey blender
+- hey brother
+- hey buddy
+- hey everyone
 - hey fender
+- hey friend
 - hey gender
 - hey lender
+- hey man
 - hey mender
 - hey render
 - hey sender
 - hey spender
 - hey tender
+- hey there
 - hey vendor
+- hey what
+- hey wonder
+- la la bender
+- lavender
 - may bender
 - my bender
+- offender
+- oh bender
 - pay bender
+- pay vendor
+- pretender
+- remember
+- remember the
 - say bender
+- slender
+- splendor
+- surrender
+- surrender now
+- tender
 - the bender
+- the defender
 - they bender
 - way bender
 notes: 'Second priority. Both OWW and mWW training required.
