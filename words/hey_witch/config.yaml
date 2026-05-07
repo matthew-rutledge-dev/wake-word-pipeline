@@ -28,10 +28,10 @@ augmentation:
   batch_size: 16
   rounds: 3
 oww:
-  layer_size: 32
-  max_negative_weight: 5000
+  layer_size: 64
+  max_negative_weight: 10000
   model_type: dnn
-  steps: 70000
+  steps: 100000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a witch

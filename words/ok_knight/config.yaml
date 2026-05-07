@@ -29,7 +29,7 @@ augmentation:
   batch_size: 16
 oww:
   model_type: dnn
-  layer_size: 32
+  layer_size: 64
   steps: 65000
   max_negative_weight: 4500
   target_fp_per_hour: 0.2

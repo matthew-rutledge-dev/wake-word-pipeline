@@ -29,9 +29,9 @@ augmentation:
   batch_size: 16
 oww:
   model_type: dnn
-  layer_size: 32
-  steps: 60000
-  max_negative_weight: 4000
+  layer_size: 64
+  steps: 100000
+  max_negative_weight: 10000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a ara

@@ -28,7 +28,7 @@ augmentation:
   batch_size: 16
   rounds: 3
 oww:
-  layer_size: 32
+  layer_size: 64
   max_negative_weight: 4000
   model_type: dnn
   steps: 60000

@@ -80,13 +80,13 @@ DEVICES = {
         "192.168.86.214",
         "2bR0ft9tA2dPF8dpXU9IRgUDwz7pyOyanysuNIG6EZY=",
         "Bond",
-        "bond_room",
+        "garage",
     ),
     "ranga": (
         "192.168.86.211",
         "0em8PEg7XbqLqL6W47PsjouzCJ+FFO0rTWS3qEAVy98=",
         "Ranga",
-        "ranga_room",
+        "guest_room",
     ),
     "puar": (
         "192.168.86.210",

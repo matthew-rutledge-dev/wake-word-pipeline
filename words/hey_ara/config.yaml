@@ -29,9 +29,9 @@ augmentation:
   batch_size: 16
 oww:
   model_type: dnn
-  layer_size: 32
-  steps: 80000
-  max_negative_weight: 6000
+  layer_size: 64
+  steps: 100000
+  max_negative_weight: 10000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a ara
@@ -62,3 +62,58 @@ notes: 'First wake word. Initial OWW model trained with espeak-ng (828KB TFLite)
   mWW retrain required for HA Voice PE firmware.
 
   '
+cloud_tts:
+  samples_per_provider: 500
+  xai:
+    voices:
+    - ara
+    - eve
+    - leo
+    - rex
+    - sal
+    - 79f3a8b96d43
+    - 78a495fdbb39
+    - 96819d0bd28d
+    - 8a8b3d7dc1e8
+    - 6a41d324
+    - f15c6a6a
+    - d11249e6
+    - a7b78b05
+    - 3b312632
+    - 6fe32f85
+    - bedd6226
+    - 93bea908
+    - 355dca53
+    - 01a7edae
+    - 4c7f16ff
+  openai:
+    voices:
+    - alloy
+    - ash
+    - ballad
+    - coral
+    - echo
+    - fable
+    - nova
+    - onyx
+    - sage
+    - shimmer
+    - verse
+  google:
+    voices:
+    - name: en-US-Wavenet-A
+      ssmlGender: MALE
+    - name: en-US-Wavenet-C
+      ssmlGender: FEMALE
+    - name: en-US-Neural2-A
+      ssmlGender: MALE
+    - name: en-US-Neural2-C
+      ssmlGender: FEMALE
+    - name: en-GB-Wavenet-A
+      ssmlGender: FEMALE
+    - name: en-GB-Wavenet-B
+      ssmlGender: MALE
+    - name: en-AU-Wavenet-A
+      ssmlGender: FEMALE
+    - name: en-AU-Wavenet-B
+      ssmlGender: MALE
