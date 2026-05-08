@@ -109,8 +109,8 @@ def generate_xai_sample(text, voice_id, api_key):
 
 
 # --- OpenAI TTS ---
-OPENAI_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable",
-                  "nova", "onyx", "sage", "shimmer", "verse"]
+OPENAI_VOICES = ["alloy", "ash", "coral", "echo", "fable",
+                  "nova", "onyx", "sage", "shimmer"]
 
 
 def resample_wav_24k_to_16k(wav_bytes):

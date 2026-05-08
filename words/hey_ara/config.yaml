@@ -80,7 +80,6 @@ cloud_tts:
     - d11249e6
     - a7b78b05
     - 3b312632
-    - 6fe32f85
     - bedd6226
     - 93bea908
     - 355dca53
@@ -90,7 +89,6 @@ cloud_tts:
     voices:
     - alloy
     - ash
-    - ballad
     - coral
     - echo
     - fable
@@ -98,7 +96,6 @@ cloud_tts:
     - onyx
     - sage
     - shimmer
-    - verse
   google:
     voices:
     - name: en-US-Wavenet-A
