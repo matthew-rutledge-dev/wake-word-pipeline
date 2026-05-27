@@ -64,7 +64,7 @@ def _model_config_keys(cfg: dict) -> dict:
     }
 
 
-def check_and_invalidate_caches(cfg: dict, artifact_dir: Path) -> dict:
+def check_and_invalidate_caches(cfg: dict, artifact_dir: Path, purge_samples: bool = True) -> dict:
     """Compare stored config hashes with current config.
 
     Returns a dict of which layers were invalidated:
@@ -89,7 +89,10 @@ def check_and_invalidate_caches(cfg: dict, artifact_dir: Path) -> dict:
     # Check samples (cascades to features and model)
     if stored.get("samples") != current_sample_hash:
         log.info("[%s] Config change detected affecting SAMPLES — purging sample + feature + model caches", word_id)
-        _purge_samples(artifact_dir)
+        if purge_samples:
+            _purge_samples(artifact_dir)
+        else:
+            log.warning("[%s] Sample config changed but purge_samples=False — skipping sample purge (re-run Phase 1)", word_id)
         _purge_features(artifact_dir, word_id)
         _purge_model(artifact_dir, word_id)
         invalidated = {"samples": True, "features": True, "model": True}

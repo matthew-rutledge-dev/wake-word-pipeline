@@ -74,7 +74,7 @@ def build_oww_training_config(cfg: dict, artifact_dir: Path) -> dict:
         "output_dir": str(artifact_dir),
         "rir_paths": [str(artifact_dir / "rir_data")],
         "background_paths": [str(artifact_dir / "background_data")],
-        "background_paths_duplication_rate": [1],
+        "background_paths_duplication_rate": [5],
         "false_positive_validation_data_path": str(
             artifact_dir / "validation_set_features.npy"
         ),
@@ -422,7 +422,7 @@ def main():
 
     # Auto-invalidate caches if config changed
     from _config_cache import check_and_invalidate_caches
-    invalidated = check_and_invalidate_caches(cfg, artifact_dir)
+    invalidated = check_and_invalidate_caches(cfg, artifact_dir, purge_samples=False)
     if invalidated.get("features"):
         log.info("Feature cache invalidated — will regenerate during augmentation")
 
