@@ -36,3 +36,10 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Common Voice negative data (symlink to /var/lib/vms/common_voice/wav/)
+negative_audio_cv/
+negative_audio_cv
+
+# Downloaded scripts (canonical in general repo)
+scripts/download_common_voice.sh
