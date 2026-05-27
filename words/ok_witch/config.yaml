@@ -29,9 +29,9 @@ augmentation:
   rounds: 3
 oww:
   layer_size: 32
-  max_negative_weight: 4000
+  max_negative_weight: 25000
   model_type: dnn
-  steps: 60000
+  steps: 200000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a witch

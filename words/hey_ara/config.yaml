@@ -30,8 +30,8 @@ augmentation:
 oww:
   model_type: dnn
   layer_size: 64
-  steps: 100000
-  max_negative_weight: 10000
+  steps: 300000
+  max_negative_weight: 50000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a ara

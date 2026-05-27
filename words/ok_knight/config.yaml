@@ -30,8 +30,8 @@ augmentation:
 oww:
   model_type: dnn
   layer_size: 64
-  steps: 65000
-  max_negative_weight: 4500
+  steps: 200000
+  max_negative_weight: 50000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a knight
