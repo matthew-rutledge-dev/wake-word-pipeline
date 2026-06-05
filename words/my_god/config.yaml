@@ -1,5 +1,3 @@
-word_id: ok_frieren
-display_name: Ok Frieren
 trained_languages:
 - en
 piper:
@@ -20,42 +18,36 @@ espeak:
   - en-us
   - en-gb
 samples:
-  negative_train: 40000
-  negative_val: 2000
   positive_train: 20000
   positive_val: 2000
+  negative_train: 40000
+  negative_val: 2000
 augmentation:
   batch_size: 16
   rounds: 3
 oww:
-  layer_size: 64
-  max_negative_weight: 50000
   model_type: dnn
-  steps: 300000
+  layer_size: 64
+  steps: 150000
+  max_negative_weight: 50000
   target_fp_per_hour: 0.2
+word_id: my_god
+display_name: My God
 custom_negative_phrases:
-- a frieren
-- awk frieren
-- frieren is
-- oak frieren
-- oh frieren
-- ok clearing
-- ok fearing
-- ok free rain
-- ok free run
-- ok free wren
-- ok freeze in
-- ok freezin
-- okay frieren
-- the frieren
-- uh frieren
-- ok clearing in
-- ok fearing is
-- ok freeze
-- ok freezing
-- ok free rein
-- ok freeing
-- ok foreign
-notes: 'Future batch. Created 2026-03-25.
-
-  '
+- my dog
+- my good
+- my gone
+- my got
+- my guard
+- my guide
+- my gut
+- my odd
+- by god
+- my gosh
+- my golf
+- my goal
+- my gods
+- my cod
+- my mod
+- my rod
+notes: New word. Created 2026-06-02.

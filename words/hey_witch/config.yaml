@@ -29,9 +29,9 @@ augmentation:
   rounds: 3
 oww:
   layer_size: 64
-  max_negative_weight: 10000
+  max_negative_weight: 50000
   model_type: dnn
-  steps: 100000
+  steps: 300000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a witch
@@ -52,6 +52,9 @@ custom_negative_phrases:
 - they witch
 - way witch
 - witch is
+- hey wish
+- hey with
+- hey itch
 notes: 'Future batch. Created 2026-03-25.
 
   '

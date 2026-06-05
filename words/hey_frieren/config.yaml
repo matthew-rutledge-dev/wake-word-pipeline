@@ -28,10 +28,10 @@ augmentation:
   batch_size: 16
   rounds: 3
 oww:
-  layer_size: 32
-  max_negative_weight: 2500
+  layer_size: 64
+  max_negative_weight: 50000
   model_type: dnn
-  steps: 50000
+  steps: 300000
   target_fp_per_hour: 0.2
 custom_negative_phrases:
 - a frieren
@@ -52,6 +52,10 @@ custom_negative_phrases:
 - the frieren
 - they frieren
 - way frieren
+- hey free rent
+- hey freezing
+- hey freeing
+- hey friending
 notes: 'Future batch. Created 2026-03-25.
 
   '
