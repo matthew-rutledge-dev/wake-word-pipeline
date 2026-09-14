@@ -24,8 +24,8 @@ End-to-end training pipeline for custom wake word models targeting both
 Train all 24 configured wake words autonomously:
 
 ```bash
-# From the server (servergen1.cdclocal)
-cd /opt/ai/wakeword-train
+# From your GPU host
+cd /path/to/wakeword-train
 source venv/bin/activate
 
 # Start batch training (runs in background)
@@ -94,11 +94,11 @@ Data is written to per-word CSV files in the `metrics/` directory at 10-second i
 
 ```bash
 # Generate aggregate report after training
-cd /opt/ai/wakeword-train/wake-word-pipeline/scripts
+cd scripts
 python3 metrics_report.py
 
 # Watch live system metrics (standalone monitor)
-bash /opt/ai/wakeword-train/metrics_monitor.sh
+bash /path/to/wakeword-train/metrics_monitor.sh
 
 # Interactive GPU + CPU monitor
 nvtop
@@ -167,9 +167,9 @@ Samples are augmented with room impulse responses + background noise for realism
 
 ## Training Environment
 
-- **Server**: servergen1.cdclocal (Ubuntu 25.10)
-- **GPU**: NVIDIA RTX 5060 Ti 16GB (CUDA 13.0, Driver 580.126.09)
-- **Docker**: nvidia-container-toolkit v1.19.0-1, Docker 29.1.3 + Compose v5.1.1
+- **Server**: GPU workstation (Ubuntu)
+- **GPU**: NVIDIA RTX-class 16GB (CUDA 13.x, recent proprietary driver)
+- **Docker**: nvidia-container-toolkit + Docker Compose
 - **PyTorch**: CUDA 12.x wheels (GPU training + Piper inference)
 - **TensorFlow**: GPU support for mWW training + OWW embedding computation
 
@@ -181,10 +181,10 @@ docker build -t oww-train -f docker/Dockerfile.oww .
 docker build -t mww-train -f docker/Dockerfile.mww .
 
 # Run with GPU
-docker run --gpus all -v /opt/ai/wakeword-train:/workspace oww-train scripts/01_generate_samples.py hey_ara
+docker run --gpus all -v /path/to/workspace:/workspace oww-train scripts/01_generate_samples.py hey_ara
 
 # Run CPU fallback
-docker run -v /opt/ai/wakeword-train:/workspace oww-train scripts/01_generate_samples.py hey_ara --engine espeak
+docker run -v /path/to/workspace:/workspace oww-train scripts/01_generate_samples.py hey_ara --engine espeak
 ```
 
 ## Naming Convention
@@ -197,9 +197,9 @@ docker run -v /opt/ai/wakeword-train:/workspace oww-train scripts/01_generate_sa
 After training completes, deploy ONNX models to the openWakeWord add-on:
 
 ```bash
-# Copy models to HA (from servergen1)
-scp /opt/ai/wakeword-train/wake-word-pipeline/artifacts/*/oww/*.onnx \
-    root@homeassistant.local:/share/openwakeword/
+# Copy models to HA (from your-gpu-host)
+scp artifacts/*/oww/*.onnx \
+    user@homeassistant.local:/share/openwakeword/
 
 # Then in HA:
 # 1. Settings > Add-ons > openWakeWord > Configuration
