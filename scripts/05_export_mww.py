@@ -38,7 +38,7 @@ def create_manifest(cfg: dict, tflite_path: Path, arena_size: int = 30000) -> di
         "type": "micro",
         "wake_word": cfg["display_name"],
         "author": "cdccentral",
-        "website": "https://github.com/cdccentral-sourcecontrol/wake-word-pipeline",
+        "website": "https://github.com/matthew-rutledge-dev/wake-word-pipeline",
         "trained_languages": cfg["trained_languages"],
         "model": tflite_path.name,
         "version": 2,

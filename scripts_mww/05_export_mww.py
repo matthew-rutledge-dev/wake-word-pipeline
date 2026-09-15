@@ -55,7 +55,7 @@ def main():
         "type": "micro",
         "wake_word": display_name,
         "author": "cdccentral",
-        "website": "https://github.com/cdccentral-sourcecontrol/wake-word-pipeline",
+        "website": "https://github.com/matthew-rutledge-dev/wake-word-pipeline",
         "trained_languages": languages,
         "model": f"{word_id}.tflite",
         "version": 2,
