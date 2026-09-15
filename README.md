@@ -228,4 +228,4 @@ OWW models staged for [fwartner/home-assistant-wakewords-collection](https://git
 
 ## License
 
-MIT
+Apache-2.0 — see [LICENSE](LICENSE).
